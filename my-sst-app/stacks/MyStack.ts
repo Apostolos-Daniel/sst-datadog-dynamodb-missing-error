@@ -22,10 +22,15 @@ export function API({ stack }: StackContext) {
         environment: {
           DD_TRACE_DISABLED_PLUGINS: "dns",
         },
+        layers: ["arn:aws:lambda:us-east-1:643476110649:layer:aws-sdk-layer:1"]
       },
     },
     routes: {
-      "GET /": "packages/functions/src/lambda.handler",
+      "GET /": {
+        function: {
+          handler: "packages/functions/src/lambda.handler",
+        }
+      },
       "GET /x86_64": {
         function: {
           handler: "packages/functions/src/x86_64.handler",

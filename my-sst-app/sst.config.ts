@@ -3,7 +3,6 @@ import { API } from "./stacks/MyStack";
 import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Datadog } from "datadog-cdk-constructs-v2";
 import { Stack } from "sst/constructs";
-const ddPlugin = require('dd-trace/esbuild');
 
 export default {
   config(_input) {
@@ -26,10 +25,10 @@ export default {
     app.setDefaultFunctionProps({
       nodejs: {
         esbuild: {
-          external: ["datadog-lambda-js", "dd-trace"],
-          plugins: [ddPlugin],
+          external: ["datadog-lambda-js", "dd-trace", "aws-sdk"],
         },
       },
+      runtime: "nodejs18.x",
       environment: {
         DD_TRACE_DISABLED_PLUGINS: "dns",
       },

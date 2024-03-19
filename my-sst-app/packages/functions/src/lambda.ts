@@ -1,26 +1,30 @@
 import { ApiHandler } from "sst/node/api";
-import DynamoDB from 'aws-sdk/clients/dynamodb';
 import { Table } from 'sst/node/table';
+import AWS from 'aws-sdk';
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
 
 export const handler = ApiHandler(async (_evt) => {
   // post hello world to DynamoDB
-  const dynamoDb: DynamoDB.DocumentClient = new DynamoDB.DocumentClient();
 
-  // const params = {
-  //   TableName: Table.exampleTable.tableName,
-  //   Item: {
-  //     pk: "Hello World",
-  //     sk: new Date().toISOString(),
-  //   },
-  // };
+  const params = {
+    TableName: Table.exampleTable.tableName,
+    Item: {
+      pk: "Hello World",
+      sk: new Date().toISOString(),
+      userId: "123",
+    },
+    // This condition expression is designed to fail if the item with the given userId already exists.
+    ConditionExpression: "attribute_not_exists(userId)"
+  };
+  await dynamoDB.put(params).promise();
 
   // await dynamoDb.put(params).promise();
-  const item = await dynamoDb
+  const item = await dynamoDB
   .get({
     TableName: Table.exampleTable.tableName,
     Key: {
-      pk: `1`,
-      sk: 'Hello World',
+      pk: `Hello World`,
     },
   })
   .promise();
@@ -28,6 +32,6 @@ export const handler = ApiHandler(async (_evt) => {
 
   return {
     statusCode: 200,
-    body: `Hello world. The time is ${new Date().toISOString()}`,
+    body: `Hello world. The time is ${new Date().toISOString()}. Got from DynamoDB: ${JSON.stringify(item)}`,
   };
 });

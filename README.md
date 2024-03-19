@@ -15,3 +15,32 @@ I have not been able to reproduce the issue we get above, I'm not even getting D
 But we definitely get an `http.request` span for DynamoDB in our use case in production. 
 
 ![alt text](image-2.png)
+
+So the latest suggestion is that we have two options:
+
+1. Exclude the `aws-sdk` library entirely from being bundled by setting it as external in the esbuild config. This will allow `dd-trace` to instrument the calls the `aws-sdk` library makes as it is.
+2. Use the esbuild plugin and prebundle the application manually using esbuild from the CLI, and then pass that artifact to the CDK
+
+Let's try the first option.
+
+What do we currently get:
+
+![alt text](image-3.png)
+
+No DynamoDB span present. 
+
+If we exclude the `aws-sdk` library from being bundled, we should see the DynamoDB spans.
+
+```ts
+app.setDefaultFunctionProps({
+    nodejs: {
+    esbuild: {
+        external: ["datadog-lambda-js", "dd-trace", "aws-sdk"],
+        plugins: [ddPlugin],
+    },
+    },
+    environment: {
+    DD_TRACE_DISABLED_PLUGINS: "dns",
+    },
+});
+```
