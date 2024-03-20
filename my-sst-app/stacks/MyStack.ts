@@ -1,10 +1,18 @@
 import { StackContext, Api, EventBus, Table } from "sst/constructs";
+import { RemovalPolicy } from 'aws-cdk-lib'
+import { Code, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
 
 export function API({ stack }: StackContext) {
   const bus = new EventBus(stack, "bus", {
     defaults: {
       retries: 10,
     },
+  });
+
+  const awsSdkLayer = new LayerVersion(stack, 'AwsSdkLayer', {
+    removalPolicy: RemovalPolicy.RETAIN,
+    code: Code.fromAsset('../aws-sdk-layer/aws-sdk-layer.zip'),
+    compatibleRuntimes: [Runtime.NODEJS_18_X],
   });
 
   const table = new Table(stack, "exampleTable", {
@@ -22,7 +30,7 @@ export function API({ stack }: StackContext) {
         environment: {
           DD_TRACE_DISABLED_PLUGINS: "dns",
         },
-        layers: ["arn:aws:lambda:us-east-1:643476110649:layer:aws-sdk-layer:1"]
+        layers: [awsSdkLayer.layerVersionArn]
       },
     },
     routes: {
