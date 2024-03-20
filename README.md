@@ -172,3 +172,6 @@ And when there's an error, we get the error message and stack trace as expected:
 
 
 ![alt text](image-5.png)
+
+
+Note: I have not tried "pre-bundling" yet. I'll try that next.
