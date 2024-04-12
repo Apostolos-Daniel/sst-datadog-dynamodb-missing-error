@@ -175,3 +175,12 @@ And when there's an error, we get the error message and stack trace as expected:
 
 
 Note: I have not tried "pre-bundling" yet. I'll try that next.
+
+Let's try pre-bundling instead.
+
+## Solution #3: Pre-bundling
+
+The idea is that we use the esbuild cli to bundle the 
+
+https://esbuild.github.io/getting-started/#bundling-for-node
+

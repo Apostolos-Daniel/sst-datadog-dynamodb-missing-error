@@ -1,6 +1,13 @@
-import { StackContext, Api, EventBus, Table } from "sst/constructs";
-import { RemovalPolicy } from 'aws-cdk-lib'
+import {
+  StackContext,
+  Api,
+  EventBus,
+  Table,
+  Function as sstFunction,
+} from "sst/constructs";
+import { RemovalPolicy } from "aws-cdk-lib";
 import { Code, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
+const ddPlugin = require("dd-trace/esbuild");
 
 export function API({ stack }: StackContext) {
   const bus = new EventBus(stack, "bus", {
@@ -9,9 +16,9 @@ export function API({ stack }: StackContext) {
     },
   });
 
-  const awsSdkLayer = new LayerVersion(stack, 'AwsSdkLayer', {
+  const awsSdkLayer = new LayerVersion(stack, "AwsSdkLayer", {
     removalPolicy: RemovalPolicy.RETAIN,
-    code: Code.fromAsset('../aws-sdk-layer/aws-sdk-layer.zip'),
+    code: Code.fromAsset("../aws-sdk-layer/aws-sdk-layer.zip"),
     compatibleRuntimes: [Runtime.NODEJS_18_X],
   });
 
@@ -30,14 +37,19 @@ export function API({ stack }: StackContext) {
         environment: {
           DD_TRACE_DISABLED_PLUGINS: "dns",
         },
-        layers: [awsSdkLayer.layerVersionArn]
+        layers: [awsSdkLayer.layerVersionArn],
+        // nodejs: {
+        //   esbuild: {
+        //     plugins: [ddPlugin],
+        //   },
+        // },
       },
     },
     routes: {
       "GET /": {
         function: {
           handler: "packages/functions/src/lambda.handler",
-        }
+        },
       },
       "GET /x86_64": {
         function: {
